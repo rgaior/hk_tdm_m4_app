@@ -7,7 +7,7 @@
          // Uncomment to use mbed-baremetal instead of mbed-os
          // "target.application-profile": "bare-metal"
 
-          "target.clock_source": "USE_PLL_HSI"
+         "target.clock_source": "USE_PLL_HSI"
       }
    }
 }

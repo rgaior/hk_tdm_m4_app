@@ -253,49 +253,6 @@ typedef enum {
     SYS_WKUP0 = PA_0,
     SYS_WKUP1 = PC_13,
 
-    // TDM Specific peripherals
-
-     // CARD ID GPIO
-    CARD_ID_0   = PB_12,
-    CARD_ID_1   = PB_13,
-    CARD_ID_2   = PB_14,
-    CARD_ID_3   = PB_15,
-
-    // GPIO
-    UC_LED      = PC_6,
-    MPOW_ON     = PC_7,
-
-    // I2C bus
-    I2C1_SCL    = PB_6,
-    I2C1_SDA    = PB_7,
-
-    // USART1 connects to the Zynq
-    USART1_TX   = PA_9,
-    USART1_RX   = PA_10,
-
-    // USART3 implements RS485 Serial
-    RS485_DIR   = PB_0,
-    USART3_TX   = PB_10,
-    USART3_RX   = PC_5,
-
-    // UART5
-    UART5_TX    = PC_12,
-    UART5_RX    = PD_2,
-
-    // PWM pins for front and rear fans
-    TIM3_CH1    = PA_6,
-    TIM3_CH2    = PA_7_ALT0,
-    TIM5_CH2    = PA_1,
-    TIM5_CH3    = PA_2,
-    FAN_SPD_R0  = PA_5,
-    FAN_SPD_R1  = PC_3,
-    FAN_SPD_F0  = PA_3,
-    FAN_SPD_F1  = PC_4,
-
-    // V monitor
-    V_MON_0     = PC_0,
-    V_MON_1     = PC_1,
-
     // Not connected
     NC = (int)0xFFFFFFFF
 } PinName;

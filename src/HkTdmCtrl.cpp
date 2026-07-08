@@ -6,6 +6,7 @@
 //
 
 #include "HkTdmCtrl.h"
+#include "HkTdmPins.h"
 
 // Instantiate I2C peripheral
 I2C             i2c(I2C1_SDA, I2C1_SCL);

@@ -42,6 +42,13 @@ target_include_directories(${PROJECT} PUBLIC
    ${CMAKE_CURRENT_LIST_DIR}/lib/redlibs/targets
 )
 
+# NUCLEO_F446RE
+if(MBED_TARGET STREQUAL "NUCLEO_F446RE")
+   target_sources(mbed-os INTERFACE
+      ${CMAKE_CURRENT_LIST_DIR}/mbed-os/targets/TARGET_STM/TARGET_STM32F4/clock_cfg/TARGET_STM32F4_180MHZ/system_clock.c
+   )
+endif()
+
 target_link_libraries(${PROJECT} mbed-os)
 
 mbed_set_post_build(${PROJECT})
