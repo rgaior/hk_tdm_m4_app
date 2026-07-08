@@ -1,0 +1,6 @@
+[submodule "mbed-os"]
+	path = mbed-os
+	url = https://github.com/mbed-ce/mbed-os.git
+[submodule "lib/redlibs"]
+	path = lib/redlibs
+	url = https://gtortone@bitbucket.org/fabrizio_ameli/redlibs
