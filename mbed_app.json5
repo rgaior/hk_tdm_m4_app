@@ -1,14 +1,20 @@
 {
    "target_overrides": {
-      "*": {
-         "platform.stdio-baud-rate": 115200,
-         "platform.stdio-buffered-serial": 1,
 
-         // Uncomment to use mbed-baremetal instead of mbed-os
-         // "target.application-profile": "bare-metal"
+        "*": {
+            "platform.stdio-baud-rate": 115200,
+            "platform.stdio-buffered-serial": 1,
+        },
 
-         "target.clock_source": "USE_PLL_HSI"
-      }
+        "NUCLEO_F446RE": {
+            "target.clock_profile": "TARGET_STM32F4_180MHZ",
+            //"target.clock_source": "USE_PLL_HSE_EXTC"
+        },
+
+        TARGET_HK_TDM_F446RE: {
+            "target.clock_profile": "TARGET_STM32F4_180MHZ",
+            //"target.clock_source": "USE_PLL_HSE_EXTC"
+        }
    }
 }
 
