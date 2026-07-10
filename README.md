@@ -13,3 +13,9 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release -DMBED_TARGET=TARGET_HK_TDM_F446RE
 
 make -j -C build
 ```
+
+## Packages to install on Debian
+
+```
+apt-get install openssh-client git cmake ninja-build gcc-arm-none-eabi vim python3 python3-venv
+```
