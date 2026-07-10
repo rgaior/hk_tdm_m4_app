@@ -30,11 +30,10 @@ char outPacket[PKT_SIZE];
 #ifdef DEBUG_ON_NUCLEO_F446RE
 //Serial serial(PA_2, PA_3, 115200);
 #else
-// Serial serial(UART5_TX, UART5_RX, 115200);
-// Serial serial(USART1_TX, USART1_RX, 115200);
-//Serial serial(PA_9, PA_10, 115200);
-BufferedSerial serial(PA_9, PA_10, 115200);
+UnbufferedSerial serial(PA_9, PA_10, 115200);
 #endif
+
+char outbuf[MAX_PACKET_SIZE * 2];
 
 // DEFINE LIST OF COMMANDS
 extern _COPacketCmdList HkTdmCmdList;
@@ -69,8 +68,28 @@ extern DigitalOut led;
 // extern Serial serial3;
 // extern Serial serial5;
 
-// main()
-int main() {
+int main(void) {
+   
+   // --- test 1
+   //char c;
+   //while (true) {
+   //   if (serial.readable()) {
+   //      c = serial.read(&c, 1);
+   //      serial.write(&c, 1);
+   //   }
+   //}
+   // --- test 1
+   // 
+   // --- test 2
+   //while (true) {
+   //   //serial.write("Hello!\n", 7);
+   //   sprintf(outbuf, "Hello %d\n", 42);
+   //   serial.write(outbuf, strlen(outbuf));
+   //   led = !led;
+   //   wait_us(2500000);
+   //}
+   // --- test 2
+   //
     // char c='@';
     // uint16_t i=0;
 
@@ -90,6 +109,7 @@ int main() {
     // // }while (c != '#');
     // }while(1);
 
+
     // Display menu
     if (DEBUG_LEVEL){
         if (!disMenu(SERIAL_IO_DEVICE)){
@@ -104,7 +124,8 @@ int main() {
     {
         // HANDLE ERROR
         pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)HKTDM_ERR_BOARD_INIT);
-        //serial.printf("%s\r\n", outPacket);
+        sprintf(outbuf, "%s\r\n", outPacket);
+        serial.write(outbuf, strlen(outbuf));
     }
 
     // Initialize Board
@@ -113,7 +134,8 @@ int main() {
     {
         // HANDLE ERROR
         pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
-        //serial.printf("%s\r\n", outPacket);
+        sprintf(outbuf, "%s\r\n", outPacket);
+        serial.write(outbuf, strlen(outbuf));
     }
 
     // START DEBUG //
@@ -121,8 +143,10 @@ int main() {
         float v0, v1;
         hk_tdm.GetBoardVin0(&v0);
         hk_tdm.GetBoardVin1(&v1);
-        //serial.printf("TDM Debug #1\r\n");
-        //serial.printf("%f %f\r\n", v0, v1);
+        sprintf(outbuf, "%s", "TDM Debug #1\r\n");
+        serial.write(outbuf, strlen(outbuf));
+        sprintf(outbuf, "%f %f\r\n", v0, v1);
+        serial.write(outbuf, strlen(outbuf));
     }
 
     // Infinite loop waiting for command packets
@@ -134,15 +158,20 @@ int main() {
             // Receive command packet
             errCode = getPacketFrom(packet, SERIAL_IO_DEVICE);
             // DEBUG: uncomment to print received packet
-            //if (DEBUG_LEVEL>0) serial.printf("%s\r\n", packet);
+            if (DEBUG_LEVEL>0) {
+               sprintf(outbuf, "%s\r\n", packet);
+               serial.write(outbuf, strlen(outbuf));
+            }
 
             // Parse and execute command, and output response or error
             if(errCode == HKTDM_ERR_NO_ERROR){
                 executePacket(packet, SERIAL_IO_DEVICE);
-                //serial.printf("%s\r\n", outPacket);
+                sprintf(outbuf, "%s\r\n", outPacket);
+                serial.write(outbuf, strlen(outbuf));
             }else{
                 pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
-                //serial.printf("%s\r\n", outPacket);
+                sprintf(outbuf, "%s\r\n", outPacket);
+                serial.write(outbuf, strlen(outbuf));
             }
         }
     }
@@ -161,7 +190,7 @@ bool disMenu(IOPrintDevice_type _IO){
 
     // Print to selected IO device
     if(_IO == SERIAL_IO_DEVICE){
-        //serial.printf(menu_str);
+        serial.write(menu_str, strlen(menu_str));
     }
     return true;
 }
@@ -171,14 +200,17 @@ HKTDM_Error_type getPacketFrom(char _gcmd[], IOPrintDevice_type _IO){
     char    pkt_char = ' ';
     uint16_t index = 0;
 
-    //if(_IO == SERIAL_IO_DEVICE) pkt_char = serial.getc();
+    if(_IO == SERIAL_IO_DEVICE) 
+       serial.read(&pkt_char, 1);
 
     if (pkt_char == pkt.GetStartChar()){
         index = 0;  // reset
         _gcmd[index++] = pkt_char;
         do
         {               
-            //if(_IO == SERIAL_IO_DEVICE) pkt_char = serial.getc();
+            if(_IO == SERIAL_IO_DEVICE) 
+               serial.read(&pkt_char, 1);
+
             if (index < PKT_SIZE) _gcmd[index++] = pkt_char;  // put it into the value array and increment the index
         } while (pkt_char != pkt.GetStopChar());    // loop until the '#' character
     }else{
@@ -194,9 +226,11 @@ HKTDM_Error_type executePacket(char _gcmd[], IOPrintDevice_type _IO){
     uint16_t pwm_period;
 
     // Parse Command string
-    //serial.printf("\r\nPacket \"%s\"\r\n", _gcmd);
+    //sprintf(outbuf, "\r\nPacket \"%s\"\r\n", _gcmd);
+    //serial.write(outbuf, strlen(outbuf));
     pktError = pkt.LoadString(_gcmd);
-    //serial.printf("\r\nPacket \"%s\" OK. Field number = %u.\r\n", _gcmd, pkt.GetFieldNumber());
+    //sprintf(outbuf, "\r\nPacket \"%s\" OK. Field number = %u.\r\n", _gcmd, pkt.GetFieldNumber());
+    //serial.write(outbuf, strlen(outbuf));
     
     if(pktError != COPACKET_NOERR) {
         errCode = HKTDM_ERR_PACKET_ERROR;

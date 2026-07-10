@@ -46,6 +46,9 @@ typedef enum {
 } ALTx;
 
 typedef enum {
+    // Not connected
+    NC = (int)0xFFFFFFFF,
+
     PA_0  = 0x00,
     PA_0_ALT0 = PA_0 | ALT0,
     PA_0_ALT1 = PA_0 | ALT1,
@@ -176,20 +179,20 @@ typedef enum {
 
     // STDIO for console print
 #ifdef MBED_CONF_TARGET_STDIO_UART_TX
-    // STDIO_UART_TX = MBED_CONF_TARGET_STDIO_UART_TX,
+    //CONSOLE_TX = MBED_CONF_TARGET_STDIO_UART_TX,
 #else
-    STDIO_UART_TX = PA_9,
-    CONSOLE_TX = PA_9,
-    // STDIO_UART_TX = PA_2,
-    // STDIO_UART_TX = PC_12,
+    //CONSOLE_TX = PA_9,
+    //STDIO_UART_TX = PA_9,
+    CONSOLE_TX = NC,
+    STDIO_UART_TX = NC,
 #endif
 #ifdef MBED_CONF_TARGET_STDIO_UART_RX
-    // STDIO_UART_RX = MBED_CONF_TARGET_STDIO_UART_RX,
+    //CONSOLE_RX = MBED_CONF_TARGET_STDIO_UART_RX,
 #else
-    STDIO_UART_RX = PA_10,
-    CONSOLE_RX = PA_10,
-    // STDIO_UART_RX = PA_3,
-    // STDIO_UART_RX = PD_2,
+    CONSOLE_RX = NC,
+    STDIO_UART_RX = NC,
+    //CONSOLE_RX = PA_10,
+    //STDIO_UART_RX = PA_10,
 #endif
 
     // // Generic signals namings
@@ -253,8 +256,6 @@ typedef enum {
     SYS_WKUP0 = PA_0,
     SYS_WKUP1 = PC_13,
 
-    // Not connected
-    NC = (int)0xFFFFFFFF
 } PinName;
 
 #ifdef __cplusplus

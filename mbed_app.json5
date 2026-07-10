@@ -8,13 +8,8 @@
 
         "NUCLEO_F446RE": {
             "target.clock_profile": "TARGET_STM32F4_180MHZ",
-            //"target.clock_source": "USE_PLL_HSE_EXTC"
         },
 
-        TARGET_HK_TDM_F446RE: {
-            "target.clock_profile": "TARGET_STM32F4_180MHZ",
-            //"target.clock_source": "USE_PLL_HSE_EXTC"
-        }
    }
 }
 
