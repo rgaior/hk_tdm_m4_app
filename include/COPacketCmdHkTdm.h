@@ -12,10 +12,9 @@
 
 // This enum defines the numeric values of command codes
 enum HKTDM_CMD_LIST {
-    // Da implementare con TMP112...
     HKTDM_READ_TEMPERATURE = 0,
 
-    HKTDM_GET_UNIQUE_ID,
+    HKTDM_GET_CARD_ID,
 
     HKTDM_GET_BRD_V0,
     HKTDM_GET_BRD_V1,
@@ -24,9 +23,12 @@ enum HKTDM_CMD_LIST {
     HKTDM_SET_PWM_DCYCLE,
     HKTDM_SET_PWM_PERIOD,
 
+    HKTDM_GET_UNIQUE_ID,
     // HKTDM_STAT,
+    HKTDM_SET_POWER,
+    HKTDM_GET_POWER,
     HKTDM_HELP,
-    HKTDM_ERRO
+    HKTDM_ERRO,
 };
 
 #endif /* COPacketCmdHkTdm_h */

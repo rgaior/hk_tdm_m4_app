@@ -133,7 +133,8 @@ public:
   HKTDM_Error_type Init(int _period_in_ms=100, float _dutyCycle=.95);
   HKTDM_Error_type ReadTemp(float& _temp) { _temp=0; return HKTDM_ERR_NO_ERROR; }
   // HKTDM_Error_type GetCardID(uint8_t* _cardID);
-  HKTDM_Error_type GetUniqueID(uint32_t* _uniqueID);
+  //  HKTDM_Error_type GetUniqueID(uint32_t* _uniqueID);
+  HKTDM_Error_type GetUniqueID(uint16_t* _uniqueID);
   // void SetCardID(); 
   
   HKTDM_Error_type SetMPOW(uint8_t power_setting);

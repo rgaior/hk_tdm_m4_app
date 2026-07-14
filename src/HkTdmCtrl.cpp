@@ -77,12 +77,13 @@ HKTDM_Error_type HkTdmCtrlr::Init(int _period_in_ms, float _dutyCycle) {
 //     return HKTDM_ERR_NO_ERROR;
 // }
 
-HKTDM_Error_type HkTdmCtrlr::GetUniqueID(uint32_t *_uniqueID)
+HKTDM_Error_type HkTdmCtrlr::GetUniqueID(uint16_t *_uniqueID)
+//HKTDM_Error_type HkTdmCtrlr::GetUniqueID(uint32_t *_uniqueID)
 {
   unsigned long *uid = (unsigned long *)0x1FFF7A10;    
   //  _uniqueID = (unsigned long *)0x1FFF7A10;    
   //  uint32_t* a = 12;
-  *_uniqueID = uid[2];
+  *_uniqueID = (uint16_t)uid[2];
   //  *_cardID = cardID;
    //   *_cardID = cardID;
     return HKTDM_ERR_NO_ERROR;

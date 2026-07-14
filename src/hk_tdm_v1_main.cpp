@@ -59,14 +59,21 @@ bool disMenu(IOPrintDevice_type _IO);
 HkTdmCtrlr hk_tdm;
 
 extern DigitalOut led;
-// extern PwmOut jf_af;
-// extern PwmOut jf_ar;
-// extern PwmOut jf_bf;
-// extern PwmOut jf_br;
-// extern AnalogIn v_mon0;
-// extern AnalogIn v_mon1;
-// extern Serial serial3;
-// extern Serial serial5;
+
+
+//romain
+HKTDM_Error_type tmp_errCode;
+char packet_onoff[PKT_SIZE];
+char outPacket_onoff[PKT_SIZE];
+UnbufferedSerial serial_onoff(PB_10, PC_5, 115200);
+extern _COPacketCmdList HkTdmCmdListOnOff;
+CCOPacket pkt_onoff(COPKT_DEFAULT_START, COPKT_DEFAULT_STOP, COPKT_DEFAULT_SEP);
+HKTDM_Error_type getPacketFromOnOff(char _gcmd[], IOPrintDevice_type);
+HKTDM_Error_type executePacketOnOff(char _gcmd[], IOPrintDevice_type);
+
+DigitalOut DriverEnable(PB_0);
+//romain
+
 
 int main(void) {
    
@@ -174,6 +181,43 @@ int main(void) {
                 serial.write(outbuf, strlen(outbuf));
             }
         }
+
+	//romain immplementation of the RS485 link
+	if (serial_onoff.readable()){
+  	  errCode = getPacketFromOnOff(packet_onoff, SERIAL_IO_DEVICE);
+	  pktError = pkt_onoff.LoadString(packet_onoff);
+	  int16_t cmdIdx = pkt_onoff.GetNextFiedlAsCOMMAND(HkTdmCmdList);
+	  uint16_t card_id_target = 0;  
+	  uint16_t card_id = 0;  
+	  tmp_errCode = hk_tdm.GetUniqueID(&card_id);
+	  pkt_onoff.GetNextFieldAsUINT16(card_id_target);
+	  // check if the board ID match the one in the message
+	  if (card_id == card_id_target){
+	    sprintf(outbuf, "%s", "RIGHT TDM \r\n");
+	    serial.write(outbuf, strlen(outbuf));
+	    // set the board in emitter mode
+	    //ReceiverEnable = 1;
+	    DriverEnable = 1;
+	    if(errCode == HKTDM_ERR_NO_ERROR){
+	      executePacketOnOff(packet_onoff, SERIAL_IO_DEVICE);
+	      sprintf(outbuf, "%s\r\n", outPacket_onoff);
+	      serial_onoff.write(outbuf, strlen(outbuf));
+	      //	      serial_onoff.printf("%s\r\n", outPacket_onoff);
+	    }
+	  }	  
+	  // if the board ID doesn't match one has to make sure to remain quiet on the line.
+	  else{
+	    sprintf(outbuf, "%s", "WRONG TDM \r\n");
+	    serial.write(outbuf, strlen(outbuf));
+	    //	    ReceiverEnable = 0;
+	    DriverEnable = 0;
+	  }
+	  // at the end all the board have to be back on listening mode
+ 	  //	  ReceiverEnable = 0;
+	  DriverEnable = 0;
+	}
+	// --romain
+
     }
 }
 
@@ -221,7 +265,7 @@ HKTDM_Error_type getPacketFrom(char _gcmd[], IOPrintDevice_type _IO){
 
 HKTDM_Error_type executePacket(char _gcmd[], IOPrintDevice_type _IO){
     uint8_t arg = 0;
-    uint32_t arg32 = 0;
+    uint16_t arg16 = 0;
     float   brd_mon_val;
     uint8_t pwm_id;
     uint16_t pwm_period;
@@ -243,19 +287,17 @@ HKTDM_Error_type executePacket(char _gcmd[], IOPrintDevice_type _IO){
     int16_t cmdIdx = pkt.GetNextFiedlAsCOMMAND(HkTdmCmdList);
     switch(cmdIdx){
       // Read card ID
-    case HKTDM_GET_UNIQUE_ID:
+    case HKTDM_GET_CARD_ID:
       //	  uint8_t ID = 0;  
-      char buffer[8];
-      errCode = hk_tdm.GetUniqueID(&arg32);
-
+      errCode = hk_tdm.GetUniqueID(&arg16);
       if(errCode != HKTDM_ERR_NO_ERROR) {
 	pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
       }else{
-	pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[cmdIdx].CmdString, (uint32_t)arg32);
+	pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[cmdIdx].CmdString, (uint32_t)arg16);
       }
       break;
 
-
+ 
       // Read temperature with TMP112
     case HKTDM_READ_TEMPERATURE:
       float   temp;
@@ -442,4 +484,101 @@ HKTDM_Error_type executePacket(char _gcmd[], IOPrintDevice_type _IO){
         break;
     }
     return errCode;
+}
+
+
+
+
+// Receive input packet
+HKTDM_Error_type getPacketFromOnOff(char _gcmd[], IOPrintDevice_type _IO){
+  char    pkt_char = ' ';
+  uint16_t index = 0;
+  
+  if(_IO == SERIAL_IO_DEVICE)
+       serial_onoff.read(&pkt_char, 1);
+  
+  if (pkt_char == pkt_onoff.GetStartChar()){
+    index = 0;  // reset
+    _gcmd[index++] = pkt_char;
+    do
+      {               
+	if(_IO == SERIAL_IO_DEVICE)
+	  serial_onoff.read(&pkt_char, 1);
+	if (index < PKT_SIZE) _gcmd[index++] = pkt_char;// put it into the value array and increment the index
+      } while (pkt_char != pkt_onoff.GetStopChar());    // loop until the '#' character
+  }else{
+    return HKTDM_ERR_COMMUNICATION;
+  }
+  return HKTDM_ERR_NO_ERROR;
+}
+
+
+HKTDM_Error_type executePacketOnOff(char _gcmd[], IOPrintDevice_type _IO){
+    uint8_t arg = 0;
+    float   brd_mon_val;
+    uint8_t pwm_id;
+    uint16_t pwm_period;
+
+    // Parse Command string
+    // serial.printf("\r\nPacket \"%s\"\r\n", _gcmd);
+    pktError = pkt_onoff.LoadString(_gcmd);
+    //serial.printf("\r\nPacket \"%s\" OK. Field number = %u.\r\n", _gcmd, pkt.GetFieldNumber());
+    //    serial_onoff.printf("commmand string %s \r\n", _gcmd);
+
+    if(pktError != COPACKET_NOERR) { 
+      errCode = HKTDM_ERR_PACKET_ERROR;
+      pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
+      return errCode;
+    }
+    
+    // Get Command field from packet and switch on it
+    int16_t cmdIdx = pkt_onoff.GetNextFiedlAsCOMMAND(HkTdmCmdList);
+    uint16_t card_id_target = 0;  
+    uint16_t card_id = 0;
+    uint8_t power_setting = 2;  
+    uint8_t curr_MPOW = 2;
+    switch(cmdIdx){
+    case HKTDM_SET_POWER:
+      errCode = hk_tdm.GetUniqueID(&card_id);
+      pkt_onoff.GetNextFieldAsUINT16(card_id_target);
+      pkt_onoff.GetNextFieldAsUINT8(power_setting);
+      hk_tdm.SetMPOW(power_setting);      
+      if(errCode != HKTDM_ERR_NO_ERROR) {
+	pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
+      }else{
+	pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[cmdIdx].CmdString, (uint32_t)card_id_target);
+      }
+      break;      
+
+    case HKTDM_GET_POWER:
+      errCode = hk_tdm.GetMPOW(&curr_MPOW);
+      if(errCode != HKTDM_ERR_NO_ERROR) {
+	pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
+      }else{
+	pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[cmdIdx].CmdString, (uint32_t)curr_MPOW);
+      }
+      break;      
+
+    // case HKTDM_HELP:
+    //   if (!disMenu(_IO)){
+    // 	pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)HKTDM_ERR_MENU_DISPLAY);
+    //   }else{
+    // 	pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[cmdIdx].CmdString);
+    //   }
+    //   break;
+       
+    // case HKTDM_ERRO:
+    //   errCode = HKTDM_ERR_NO_ERROR;   
+    //   pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[cmdIdx].CmdString);
+    //   break;
+      
+    default:
+      errCode = HKTDM_ERR_COMMAND_NOT_FOUND;   
+    //   pkt_onoff.CreatePacket(outPacket_onoff, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
+      break;
+    }
+    return errCode;
+
+
+
 }

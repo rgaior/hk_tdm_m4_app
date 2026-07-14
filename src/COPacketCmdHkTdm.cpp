@@ -29,11 +29,12 @@
 
 #include "COPacketCmdHkTdm.h"
 
-const uint16_t   HkTdmCmdSize = 8;
+
+const uint16_t   HkTdmCmdSize = 11;
 _COPacketCmdType HkTdmCommands[HkTdmCmdSize] = {
     {"temp", HKTDM_READ_TEMPERATURE,      "$temp#        - Read TP112 Temperature"},
 
-    {"gcid", HKTDM_GET_UNIQUE_ID,           "$gcid#        - Get card ID"},
+    {"gcid", HKTDM_GET_CARD_ID,           "$gcid#        - Get card ID"},
 
     {"gbv0", HKTDM_GET_BRD_V0,            "$gbv0#        - Read Board V0"},
     {"gbv1", HKTDM_GET_BRD_V1,            "$gbv1#        - Read Board V1"},
@@ -42,8 +43,14 @@ _COPacketCmdType HkTdmCommands[HkTdmCmdSize] = {
     {"pwmd", HKTDM_SET_PWM_DCYCLE,        "$pwmd id dcy# - id sets fan [0,3], dcy sets duty cycle [0, 1.]\r\n                0:AF,1:BF,2:AR,3:BR"},
     {"pwmp", HKTDM_SET_PWM_PERIOD,        "$pwmp id per# - id sets fan [0,3], per sets period in ms [0..65535]\r\n                0:AF,1:BF,2:AR,3:BR"},
 
+    {"guid", HKTDM_GET_UNIQUE_ID,         "$guid#        - Get uc Unique ID"},
+ 
+    {"spwr", HKTDM_SET_POWER,      "--RS485 specific $spwr cid 0/1#  - cid is the Card ID, 0:Off 1:On Switch on and off the power for the SOC"},
+    {"gpwr", HKTDM_GET_POWER,      "--RS485 specific $gpwr cid #  - cid is the Card ID, returns Switch of the power for the SOC state"},
+
     {"help", HKTDM_HELP,                  "$help#        - Print this menu"},
     {"erro", HKTDM_ERRO,                  ""}
+
 };
 
 _COPacketCmdList HkTdmCmdList = {
