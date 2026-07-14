@@ -23,6 +23,8 @@
 #include <common/include/include_IICController.h>
 #include "libs/system/SysTime.h"
 
+#include <map>
+
 // using namespace LIBS::PERIPHERALS;
 // error namespace definition
 using namespace COMMON::DEFINES::ERRORS;
@@ -127,46 +129,57 @@ public:
 class HkTdmCtrlr {
 
 public:
-	HkTdmCtrlr();
+  HkTdmCtrlr();
+  HKTDM_Error_type Init(int _period_in_ms=100, float _dutyCycle=.95);
+  HKTDM_Error_type ReadTemp(float& _temp) { _temp=0; return HKTDM_ERR_NO_ERROR; }
+  // HKTDM_Error_type GetCardID(uint8_t* _cardID);
+  HKTDM_Error_type GetUniqueID(uint32_t* _uniqueID);
+  // void SetCardID(); 
+  
+  HKTDM_Error_type SetMPOW(uint8_t power_setting);
+  HKTDM_Error_type GetMPOW(uint8_t* _power_setting);
 
-	HKTDM_Error_type Init(int _period_in_ms=100, float _dutyCycle=.95);
-	HKTDM_Error_type ReadTemp(float& _temp) { _temp=0; return HKTDM_ERR_NO_ERROR; }
-	HKTDM_Error_type GetCardID(uint8_t* _cardID);
-
-	HKTDM_Error_type GetBoardVin0(float* _adc_mon);
-	HKTDM_Error_type GetBoardVin1(float* _adc_mon);
-
-	bool			 GetInitialized()     { return initialized; };
-	// uint32_t		 GetCalmuxStatusReg() { return status.CALMUX; };
-	// uint32_t		 GetStatusReg()       { return (uint32_t)status.reg; };
-
-	// PWM methods
-	void			 SetPwmPeriod_JFAF(int _period_in_ms);
-	void			 SetPwmPeriod_JFBF(int _period_in_ms);
-	void			 SetPwmPeriod_JFAR(int _period_in_ms);
-	void			 SetPwmPeriod_JFBR(int _period_in_ms);
-	void			 SetPwmDutyCycle_JFAF(float _dutyCycle);
-	void			 SetPwmDutyCycle_JFBF(float _dutyCycle);
-	void			 SetPwmDutyCycle_JFAR(float _dutyCycle);
-	void			 SetPwmDutyCycle_JFBR(float _dutyCycle);
-
-// Private methods
+  
+  
+  HKTDM_Error_type GetBoardVin0(float* _adc_mon);
+  HKTDM_Error_type GetBoardVin1(float* _adc_mon);
+  
+  bool			 GetInitialized()     { return initialized; };
+  
+  // uint32_t		 GetCalmuxStatusReg() { return status.CALMUX; };
+  // uint32_t		 GetStatusReg()       { return (uint32_t)status.reg; };
+  
+  // PWM methods
+  void			 SetPwmPeriod_JFAF(int _period_in_ms);
+  void			 SetPwmPeriod_JFBF(int _period_in_ms);
+  void			 SetPwmPeriod_JFAR(int _period_in_ms);
+  void			 SetPwmPeriod_JFBR(int _period_in_ms);
+  void			 SetPwmDutyCycle_JFAF(float _dutyCycle);
+  void			 SetPwmDutyCycle_JFBF(float _dutyCycle);
+  void			 SetPwmDutyCycle_JFAR(float _dutyCycle);
+  void			 SetPwmDutyCycle_JFBR(float _dutyCycle);
+  
+  // Private methods
 private:
-	void			 SetPwmPeriod_ms(PwmOut* _lpPwm, int _period_in_ms){ _lpPwm->period_ms(_period_in_ms); };
-	void			 SetPwmDutyCycle(PwmOut* _lpPwm, float _dutyCycle) { _lpPwm->write(_dutyCycle); };
-
-	// void SetCalmuxStatusBit(uint8_t _status_bit_pos) {
-	// 	status.CALMUX |= (1UL << _status_bit_pos);
-	// };
-	// void ClearCalmuxStatusBit(uint8_t _status_bit_pos) {
-	// 	status.CALMUX &= ~(1UL << _status_bit_pos);
-	// };
-	// void ClearStatusReg() { status.reg = 0;} ;
-
-// Private variables
+  void			 SetPwmPeriod_ms(PwmOut* _lpPwm, int _period_in_ms){ _lpPwm->period_ms(_period_in_ms); };
+  void			 SetPwmDutyCycle(PwmOut* _lpPwm, float _dutyCycle) { _lpPwm->write(_dutyCycle); };
+  
+  // void SetCalmuxStatusBit(uint8_t _status_bit_pos) {
+  // 	status.CALMUX |= (1UL << _status_bit_pos);
+  // };
+  // void ClearCalmuxStatusBit(uint8_t _status_bit_pos) {
+  // 	status.CALMUX &= ~(1UL << _status_bit_pos);
+  // };
+  // void ClearStatusReg() { status.reg = 0;} ;
+  
+  // Private variables
 private:
-	bool			initialized;
-	// HkTdmStatus_t	status;
+  uint8_t cardID;
+  uint32_t uniqueID;
+  bool			initialized;
+  // HkTdmStatus_t	status;
 };
+
+
 
 #endif /* HKTDMCTRL_H */

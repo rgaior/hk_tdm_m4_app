@@ -15,7 +15,7 @@ enum HKTDM_CMD_LIST {
     // Da implementare con TMP112...
     HKTDM_READ_TEMPERATURE = 0,
 
-    HKTDM_GET_CARD_ID,
+    HKTDM_GET_UNIQUE_ID,
 
     HKTDM_GET_BRD_V0,
     HKTDM_GET_BRD_V1,

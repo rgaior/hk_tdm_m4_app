@@ -33,7 +33,7 @@ const uint16_t   HkTdmCmdSize = 8;
 _COPacketCmdType HkTdmCommands[HkTdmCmdSize] = {
     {"temp", HKTDM_READ_TEMPERATURE,      "$temp#        - Read TP112 Temperature"},
 
-    {"gcid", HKTDM_GET_CARD_ID,           "$gcid#        - Get card ID"},
+    {"gcid", HKTDM_GET_UNIQUE_ID,           "$gcid#        - Get card ID"},
 
     {"gbv0", HKTDM_GET_BRD_V0,            "$gbv0#        - Read Board V0"},
     {"gbv1", HKTDM_GET_BRD_V1,            "$gbv1#        - Read Board V1"},

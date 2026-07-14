@@ -221,6 +221,7 @@ HKTDM_Error_type getPacketFrom(char _gcmd[], IOPrintDevice_type _IO){
 
 HKTDM_Error_type executePacket(char _gcmd[], IOPrintDevice_type _IO){
     uint8_t arg = 0;
+    uint32_t arg32 = 0;
     float   brd_mon_val;
     uint8_t pwm_id;
     uint16_t pwm_period;
@@ -238,22 +239,26 @@ HKTDM_Error_type executePacket(char _gcmd[], IOPrintDevice_type _IO){
         return errCode;
     }
     
-    // Get Command field from packet and switch on it
+    // // Get Command field from packet and switch on it
     int16_t cmdIdx = pkt.GetNextFiedlAsCOMMAND(HkTdmCmdList);
     switch(cmdIdx){
-        // Read card ID
-        case HKTDM_GET_CARD_ID:
-            errCode = hk_tdm.GetCardID(&arg);
-            if(errCode != HKTDM_ERR_NO_ERROR) {
-                pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
-            }else{
-                pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[cmdIdx].CmdString, (uint32_t)arg);
-            }
-        break;
+      // Read card ID
+    case HKTDM_GET_UNIQUE_ID:
+      //	  uint8_t ID = 0;  
+      char buffer[8];
+      errCode = hk_tdm.GetUniqueID(&arg32);
 
-        // Read temperature with TMP112
-        case HKTDM_READ_TEMPERATURE:
-            float   temp;
+      if(errCode != HKTDM_ERR_NO_ERROR) {
+	pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)errCode);
+      }else{
+	pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[cmdIdx].CmdString, (uint32_t)arg32);
+      }
+      break;
+
+
+      // Read temperature with TMP112
+    case HKTDM_READ_TEMPERATURE:
+      float   temp;
 
             errCode = hk_tdm.ReadTemp(temp);
             if(errCode != HKTDM_ERR_NO_ERROR) {

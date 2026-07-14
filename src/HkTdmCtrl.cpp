@@ -16,9 +16,6 @@ CIICController	p_iicCtrl(&i2c);
 // Instantiate SHT21 obj
 // CSHT21      SHT21(p_iicCtrl);
 
-// Card ID bus made up with DigitalOut pins
-BusIn cardID(CARD_ID_0, CARD_ID_1, CARD_ID_2, CARD_ID_3);
-
 // Board LED
 DigitalOut led(UC_LED, 1);
 
@@ -30,6 +27,9 @@ PwmOut jf_br(TIM5_CH3);        // JF_BR -> FAN_PWM<3> -> PA2      -> TIM5_CH3
 
 AnalogIn v_mon0(V_MON_0);
 AnalogIn v_mon1(V_MON_1);
+
+// SOC Power 
+DigitalOut MPOW(PC_7);
 
 // Serial serial3(USART3_TX, USART3_RX, 9600);
 // Serial serial5(UART5_TX, UART5_RX, 9600);
@@ -57,14 +57,56 @@ HKTDM_Error_type HkTdmCtrlr::Init(int _period_in_ms, float _dutyCycle) {
     SetPwmDutyCycle_JFBF(_dutyCycle);
     SetPwmDutyCycle_JFAR(_dutyCycle);
     SetPwmDutyCycle_JFBR(_dutyCycle);
-
     return HKTDM_ERR_NO_ERROR;
 }
 
-HKTDM_Error_type HkTdmCtrlr::GetCardID(uint8_t *_cardID)
+// void HkTdmCtrlr::SetCardID()
+// {
+//    // get the Unique 96 bits chip ID by reading the register at address 0x1FFF7A10 as p/1334 https://www.st.com/resource/en/reference_manual/rm0390-stm32f446xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf
+//    // UID 540226882 and 540619073 are from eval board
+//    // return 0 for unknown chip ID
+//   unsigned long *uid = (unsigned long *)0x1FFF7A10;    
+//   cardID = id_map[uid[2]];
+// }
+
+
+// HKTDM_Error_type HkTdmCtrlr::GetCardID(uint8_t *_cardID)
+// {
+//    *_cardID = cardID;
+//    //   *_cardID = cardID;
+//     return HKTDM_ERR_NO_ERROR;
+// }
+
+HKTDM_Error_type HkTdmCtrlr::GetUniqueID(uint32_t *_uniqueID)
 {
-    *_cardID = cardID;
+  unsigned long *uid = (unsigned long *)0x1FFF7A10;    
+  //  _uniqueID = (unsigned long *)0x1FFF7A10;    
+  //  uint32_t* a = 12;
+  *_uniqueID = uid[2];
+  //  *_cardID = cardID;
+   //   *_cardID = cardID;
     return HKTDM_ERR_NO_ERROR;
+}
+
+HKTDM_Error_type HkTdmCtrlr::SetMPOW(uint8_t setting)
+{
+  if (setting == 1){
+    MPOW = 1 ;
+    return HKTDM_ERR_NO_ERROR;
+  }
+  if (setting == 0){
+    MPOW = 0 ;
+    return HKTDM_ERR_NO_ERROR;
+  }
+  else {
+    return HKTDM_ERR_NO_ERROR;
+  }
+}
+
+HKTDM_Error_type HkTdmCtrlr::GetMPOW(uint8_t *_setting)
+{
+  *_setting = MPOW;
+  return HKTDM_ERR_NO_ERROR;
 }
 
 // Get voltage V0
