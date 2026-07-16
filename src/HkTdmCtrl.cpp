@@ -77,6 +77,7 @@ HKTDM_Error_type HkTdmCtrlr::Init(int _period_in_ms, float _dutyCycle) {
 //     return HKTDM_ERR_NO_ERROR;
 // }
 
+
 HKTDM_Error_type HkTdmCtrlr::GetUniqueID(uint16_t *_uniqueID)
 //HKTDM_Error_type HkTdmCtrlr::GetUniqueID(uint32_t *_uniqueID)
 {

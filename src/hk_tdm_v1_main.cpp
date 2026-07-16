@@ -76,55 +76,17 @@ DigitalOut DriverEnable(PB_0);
 
 
 int main(void) {
-   
-   // --- test 1
-   //char c;
-   //while (true) {
-   //   if (serial.readable()) {
-   //      c = serial.read(&c, 1);
-   //      serial.write(&c, 1);
-   //   }
-   //}
-   // --- test 1
-   // 
-   // --- test 2
-   //while (true) {
-   //   //serial.write("Hello!\n", 7);
-   //   sprintf(outbuf, "Hello %d\n", 42);
-   //   serial.write(outbuf, strlen(outbuf));
-   //   led = !led;
-   //   wait_us(2500000);
-   //}
-   // --- test 2
-   //
-    // char c='@';
-    // uint16_t i=0;
-
-    // do{
-    //     serial.printf("TDM Debug #%d\r\n", i++);
-    //     // wait_ms(500);
-    //     wait(1.);
-    //     tstled = !tstled;
-
-    //     // Check data on serial and update c char
-    //     if (serial.readable()){
-    //         c = serial.getc();
-    //         // Transmit c char on serial
-    //         // serial.putc(c);
-    //         serial.printf("char: %c\r\n", c);
-    //     }
-    // // }while (c != '#');
-    // }while(1);
-
-
-    // Display menu
-    if (DEBUG_LEVEL){
-        if (!disMenu(SERIAL_IO_DEVICE)){
-            pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)HKTDM_ERR_MENU_DISPLAY);
-        }else{
-            pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_HELP].CmdString);
+  // switch on the SOM at power up
+  tmp_errCode = hk_tdm.SetMPOW(1);
+  
+  // Display menu
+  if (DEBUG_LEVEL){
+    if (!disMenu(SERIAL_IO_DEVICE)){
+      pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_ERRO].CmdString, (uint32_t)HKTDM_ERR_MENU_DISPLAY);
+    }else{
+      pkt.CreatePacket(outPacket, HkTdmCmdList.CmdList[HKTDM_HELP].CmdString);
         }
-    }
+  }
 
     // Check if hk_tdm class is ok
     if (!hk_tdm.GetInitialized())
@@ -209,15 +171,11 @@ int main(void) {
 	  else{
 	    sprintf(outbuf, "%s", "WRONG TDM \r\n");
 	    serial.write(outbuf, strlen(outbuf));
-	    //	    ReceiverEnable = 0;
 	    DriverEnable = 0;
 	  }
-	  // at the end all the board have to be back on listening mode
- 	  //	  ReceiverEnable = 0;
 	  DriverEnable = 0;
 	}
 	// --romain
-
     }
 }
 
